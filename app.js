@@ -16,6 +16,7 @@ app.set('view engine', 'ejs');
 let jogadores = [];
 let congruencias = [];
 let bingoInit = false;
+const MAX_JOGADORES = 5;
 
 function getRandomInt(min, max) {
     min = Math.ceil(min);
@@ -94,17 +95,11 @@ io.on('connection', socket => {
                 data['uuid'] = socket.id;
                 data['cartela'] = gerarCartelaBingo(pos-1);
                 jogadores[pos]= data;
-                if(jogadores.length == 2 && !bingoInit){
+                if(jogadores.length == MAX_JOGADORES && !bingoInit){
                     jogadores.forEach((jogador)=>{
                         io.clients().to(jogador.uuid).emit('pos-init',jogador);
-                    })
-                    if(congruencias.length){
-                            io.clients().to(jogadores[0].uuid).emit('numeros',congruencias);
-                            io.clients().to(jogadores[1].uuid).emit('numeros',congruencias);
-                            //io.clients().to(jogadores[2].uuid).emit('numeros',congruencias[i]);
-                            //io.clients().to(jogadores[3].uuid).emit('numeros',congruencias[i]);
-                            //io.clients().to(jogadores[4].uuid).emit('numeros',congruencias[i]);
-                    }
+                        io.clients().to(jogador.uuid).emit('numeros',congruencias);
+                    });
                 };
             } 
         } else {
