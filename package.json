@@ -1,0 +1,24 @@
+{
+  "name": "jogo-adivinha-idade",
+  "version": "1.0.0",
+  "description": "Jogo Adivinhar Idade",
+  "main": "index.js",
+  "author": "Victor Leandro",
+  "license": "MIT",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon node app.js"
+  },
+  "dependencies": {
+    "connect-redis": "^4.0.4",
+    "cookie-parser": "^1.4.5",
+    "dotenv": "^8.2.0",
+    "ejs": "^3.1.3",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "express-socket.io-session": "^1.3.5",
+    "redis": "^3.0.2",
+    "socket.io": "^1.0.0",
+    "uuid": "^8.2.0"
+  }
+}

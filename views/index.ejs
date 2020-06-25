@@ -1,0 +1,129 @@
+<html>
+
+<head>
+    <title>Jogo Adivinha Idade</title>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="/assets/favicon.ico">
+    <link rel="stylesheet" href="/assets/style.css">
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"
+        integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+</head>
+
+<body>
+    <section class="demo">
+        <div class="container cards">
+            <div class="column header">
+                <div class="card">
+                    <div class="card_content">
+                        <input name="username" placeholder="Digite username" type="text" id="userName"
+                            autocorrect="off"><br>
+                        <a role="button" class="card_button btn" id="btnJogar">Jogar</a>
+                        <a role="button" class="card_button btn" id="btnBingo" style="display: none;">Bingo</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br><br>
+        <div class="container cards">
+            <div class="column">
+                <div class="card">
+                    <div class="card_content">
+                        <center>
+                            <table id="table">
+                                <tr id='msg-wait'>
+                                    <td>Buscando jogadores</td>
+                                </tr>
+                            </table>
+                        </center>
+                    </div>
+                </div>
+            </div>
+            <div class="column">
+                <div class="card">
+                    <div class="card_content">
+                        <center>
+                            <p id="congruencias"></p>
+                        </center>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br><br>
+    </section>
+</body>
+<script type="text/javascript">
+    let jogadas = [];
+    var socket = io('/');
+    socket.on('error-gamer', (data) => {
+        alert(data.message);
+        if (data.username) {
+            $('#btnJogar').toggle();
+            $('input[name=username]').removeProp("disabled");
+        }
+    })
+    socket.on('vencedor', (data) => {
+        alert(`Ganhador ${data}`);
+    })
+    socket.on('pos-init', (data) => {
+        const tds = $('.td-cartela');
+        if (tds.length == 0) {
+            $('#msg-wait').remove();
+            $.each(data.cartela, (index, data) => {
+                const id = `coluna${index}`;
+                $('#table').append(`<tr id=${id}>`)
+                $.each(data, (index, numero) => {
+                    $(`#${id}`).append(`<td class="td-cartela" >${numero}</td>`);
+                })
+                $('#table').append('</tr>')
+            });
+            $('.td-cartela').on('click', (e) => {
+                e.preventDefault();
+                const td = $(e.target);
+                jogadas.push(td.text());
+                td.css('background','#f5a6a6');
+                td.css('color','#ffff');
+            });
+        }
+    })
+    socket.on('numeros', (data) => {
+        $('#btnBingo').toggle();
+        let time = 20000;
+        $.each(data,(k,v)=>{
+            setTimeout(()=>{
+                $('#congruencias').append(`${v.a}≡${v.b} <br>`);
+            },time)
+            time += 20000;
+        });
+    })
+
+    $('#btnBingo').on('click',(event)=>{
+        event.preventDefault();
+        socket.emit('bingo', jogadas);    
+    });
+
+    $('#btnJogar').on('click', (event) => {
+        event.preventDefault();
+        var username = $('input[name=username]').val();
+        if (username.length) {
+            var jogador = {
+                username
+            };
+            $('#btnJogar').toggle();
+            $('input[name=username]').prop("disabled", true);
+            socket.emit('init', jogador);
+        }
+    });
+
+    socket.on('error-gamer', (data) => {
+        alert(data.message);
+        if (data.username) {
+            $('#btnJogar').toggle();
+            $('input[name=username]').prop("disabled", false);
+        }
+    });
+</script>
+
+</html>
